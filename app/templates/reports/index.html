@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Reports</h2>
+<ul>
+  <li><a href="{{ url_for('reports.kyc_contact_audit') }}">KYC Contact Audit</a></li>
+  <li><a href="{{ url_for('reports.aum_by_currency') }}">Total AUM by Currency</a></li>
+  <li><a href="{{ url_for('reports.tech_sector_employee_investors') }}">Tech Sector Employee Investors</a></li>
+  </ul>
+{% endblock %}
+
+

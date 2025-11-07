@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Client Registration</h2>
+  <a class="btn btn-outline-secondary" href="{{ url_for('customers.list_customers') }}">Back</a>
+  </div>
+
+<form method="post">
+  {{ form.csrf_token }}
+  <div class="mb-3">
+    {{ form.first_name.label(class="form-label") }}
+    {{ form.first_name(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.last_name.label(class="form-label") }}
+    {{ form.last_name(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.date_of_birth.label(class="form-label") }}
+    {{ form.date_of_birth(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.address.label(class="form-label") }}
+    {{ form.address(class="form-control", rows=3) }}
+  </div>
+  <div>
+    {{ form.submit(class="btn btn-primary") }}
+  </div>
+</form>
+{% endblock %}
+
+

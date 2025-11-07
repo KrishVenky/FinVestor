@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Trade Execution</h2>
+  <a class="btn btn-outline-secondary" href="{{ url_for('portfolios.list_portfolios') }}">Back</a>
+</div>
+
+<form method="post">
+  {{ form.csrf_token }}
+  <div class="mb-3">{{ form.user.label(class="form-label") }}{{ form.user(class="form-select", id="user-select") }}</div>
+  <div class="mb-3">{{ form.p_id.label(class="form-label") }}{{ form.p_id(class="form-select") }}</div>
+  <div class="mb-3">{{ form.product_id.label(class="form-label") }}{{ form.product_id(class="form-select", id="product-select") }}</div>
+  <div class="mb-3">{{ form.quantity.label(class="form-label") }}{{ form.quantity(class="form-control") }}</div>
+  <div class="mb-3">{{ form.price_per_unit.label(class="form-label") }}{{ form.price_per_unit(class="form-control", id="ppu-input") }}</div>
+  <div class="mb-3">
+    <label class="form-label">Commission Rate</label>
+    <input class="form-control" id="commission-display" value="20% (auto)" readonly disabled />
+  </div>
+  <div>{{ form.submit(class="btn btn-primary") }}</div>
+</form>
+<script>
+  const priceMap = {{ price_map | tojson | safe }};
+  const selectEl = document.getElementById('product-select');
+  const ppuEl = document.getElementById('ppu-input');
+  const userEl = document.getElementById('user-select');
+  const commEl = document.getElementById('commission-display');
+  function updatePPU(){
+    const pid = selectEl.value;
+    const price = priceMap[pid];
+    if (price !== undefined && price !== null) {
+      ppuEl.value = price;
+    }
+  }
+  function updateCommission(){
+    const u = userEl.value || '';
+    const pct = (u.startsWith('E:')) ? 10 : 20;
+    commEl.value = pct + '% (auto)';
+  }
+  if (selectEl) {
+    selectEl.addEventListener('change', updatePPU);
+    // initialize on load
+    updatePPU();
+  }
+  if (userEl) {
+    userEl.addEventListener('change', updateCommission);
+    updateCommission();
+  }
+</script>
+{% endblock %}
+
+

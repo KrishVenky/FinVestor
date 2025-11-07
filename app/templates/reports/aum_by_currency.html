@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Total AUM by Currency</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Currency</th>
+      <th>Total Invested Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.currency }}</td>
+      <td>{{ r.total_invested }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+

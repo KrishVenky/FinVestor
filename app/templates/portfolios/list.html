@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Portfolios</h2>
+  <a class="btn btn-primary" href="{{ url_for('portfolios.create_portfolio') }}">New Portfolio</a>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th><a href="{{ url_for('portfolios.list_portfolios', sort='id', order='desc' if sort=='id' and order=='asc' else 'asc') }}">ID</a></th>
+      <th><a href="{{ url_for('portfolios.list_portfolios', sort='name', order='desc' if sort=='name' and order=='asc' else 'asc') }}">Name</a></th>
+      <th><a href="{{ url_for('portfolios.list_portfolios', sort='customer', order='desc' if sort=='customer' and order=='asc' else 'asc') }}">Customer Owner</a></th>
+      <th><a href="{{ url_for('portfolios.list_portfolios', sort='employee', order='desc' if sort=='employee' and order=='asc' else 'asc') }}">Employee Owner</a></th>
+      <th><a href="{{ url_for('portfolios.list_portfolios', sort='risk', order='desc' if sort=='risk' and order=='asc' else 'asc') }}">Risk</a></th>
+      <th><a href="{{ url_for('portfolios.list_portfolios', sort='currency', order='desc' if sort=='currency' and order=='asc' else 'asc') }}">Currency</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in portfolios %}
+    <tr>
+      <td>{{ p.p_id }}</td>
+      <td>{{ p.portfolio_name }}</td>
+      <td>{% if p.customer %}{{ p.customer.first_name }} {{ p.customer.last_name }}{% endif %}</td>
+      <td>{{ p.employee.employee_name if p.employee else '' }}</td>
+      <td>{{ p.risk_level or '' }}</td>
+      <td>{{ p.currency or '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+

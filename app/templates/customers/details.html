@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>KYC & Risk Profile - {{ customer.first_name }} {{ customer.last_name }}</h2>
+  <a class="btn btn-outline-secondary" href="{{ url_for('customers.list_customers') }}">Back</a>
+</div>
+
+<form method="post">
+  {{ form.csrf_token }}
+  <div class="row">
+    <div class="col-md-6">
+      <div class="mb-3">{{ form.ssn.label(class="form-label") }}{{ form.ssn(class="form-control") }}</div>
+      <div class="mb-3">{{ form.pan_number.label(class="form-label") }}{{ form.pan_number(class="form-control") }}</div>
+      <div class="mb-3">{{ form.aadhar_number.label(class="form-label") }}{{ form.aadhar_number(class="form-control") }}</div>
+      <div class="mb-3">{{ form.occupation.label(class="form-label") }}{{ form.occupation(class="form-control") }}</div>
+      <div class="mb-3">{{ form.annual_income.label(class="form-label") }}{{ form.annual_income(class="form-control") }}</div>
+      <div class="mb-3">
+        <label class="form-label">{{ form.risk_tolerance.label.text }}</label>
+        <div>
+          {% for sub in form.risk_tolerance %}
+            <div class="form-check form-check-inline">
+              {{ sub(class="form-check-input") }}
+              <label class="form-check-label" for="{{ sub.id }}">{{ sub.label.text }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h5>Contact Numbers</h5>
+      <div id="phones-container">
+        {% for entry in form.phones %}
+          <div class="row g-2 mb-2 phone-row">
+            <div class="col-6">{{ entry.form.phone_number(class="form-control", placeholder="Phone Number") }}</div>
+            <div class="col-4">{{ entry.form.phone_type(class="form-select") }}</div>
+            <div class="col-2 d-grid"><button type="button" class="btn btn-outline-danger" onclick="removePhoneRow(this)">Remove</button></div>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-secondary mb-3" onclick="addPhone()">Add Phone</button>
+
+      <h5>Email Addresses</h5>
+      <div id="emails-container">
+        {% for entry in form.emails %}
+          <div class="row g-2 mb-2 email-row">
+            <div class="col-6">{{ entry.form.email_address(class="form-control", placeholder="Email Address") }}</div>
+            <div class="col-4">{{ entry.form.email_type(class="form-select") }}</div>
+            <div class="col-2 d-grid"><button type="button" class="btn btn-outline-danger" onclick="removeEmailRow(this)">Remove</button></div>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addEmail()">Add Email</button>
+    </div>
+  </div>
+
+  <div class="mt-3">{{ form.submit(class="btn btn-primary") }}</div>
+</form>
+
+<script>
+function reindex(containerId, fieldPrefix, fields) {
+  const container = document.getElementById(containerId);
+  const rows = container.querySelectorAll('.row');
+  rows.forEach((row, idx) => {
+    fields.forEach(({ name, type }) => {
+      const el = row.querySelector(`[name^="${fieldPrefix}-"][name$="-${name}"]`);
+      if (el) {
+        el.name = `${fieldPrefix}-${idx}-${name}`;
+        el.id = `${fieldPrefix}-${idx}-${name}`;
+      }
+    });
+  });
+}
+
+function addPhone(){
+  const container = document.getElementById('phones-container');
+  const index = container.querySelectorAll('.row').length;
+  const html = `
+  <div class="row g-2 mb-2 phone-row">
+    <div class="col-6"><input class="form-control" id="phones-${index}-phone_number" name="phones-${index}-phone_number" type="text" value=""></div>
+    <div class="col-4">
+      <select class="form-select" id="phones-${index}-phone_type" name="phones-${index}-phone_type">
+        <option value="mobile">Mobile</option>
+        <option value="home">Home</option>
+        <option value="work">Work</option>
+      </select>
+    </div>
+    <div class="col-2 d-grid"><button type="button" class="btn btn-outline-danger" onclick="removePhoneRow(this)">Remove</button></div>
+  </div>`;
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+function addEmail(){
+  const container = document.getElementById('emails-container');
+  const index = container.querySelectorAll('.row').length;
+  const html = `
+  <div class="row g-2 mb-2 email-row">
+    <div class="col-6"><input class="form-control" id="emails-${index}-email_address" name="emails-${index}-email_address" type="email" value=""></div>
+    <div class="col-4">
+      <select class="form-select" id="emails-${index}-email_type" name="emails-${index}-email_type">
+        <option value="personal">Personal</option>
+        <option value="work">Work</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="col-2 d-grid"><button type="button" class="btn btn-outline-danger" onclick="removeEmailRow(this)">Remove</button></div>
+  </div>`;
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+function removePhoneRow(btn){
+  const row = btn.closest('.row');
+  row.remove();
+  reindex('phones-container', 'phones', [
+    { name: 'phone_number' },
+    { name: 'phone_type' },
+  ]);
+}
+
+function removeEmailRow(btn){
+  const row = btn.closest('.row');
+  row.remove();
+  reindex('emails-container', 'emails', [
+    { name: 'email_address' },
+    { name: 'email_type' },
+  ]);
+}
+</script>
+{% endblock %}
+
+

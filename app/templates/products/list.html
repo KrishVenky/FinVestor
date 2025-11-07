@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Product Catalog</h2>
+  <a class="btn btn-primary" href="{{ url_for('products.create_product') }}">New Product</a>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th><a href="{{ url_for('products.list_products', sort='id', order='desc' if sort=='id' and order=='asc' else 'asc') }}">ID</a></th>
+      <th><a href="{{ url_for('products.list_products', sort='name', order='desc' if sort=='name' and order=='asc' else 'asc') }}">Name</a></th>
+      <th><a href="{{ url_for('products.list_products', sort='ticker', order='desc' if sort=='ticker' and order=='asc' else 'asc') }}">Ticker</a></th>
+      <th><a href="{{ url_for('products.list_products', sort='price', order='desc' if sort=='price' and order=='asc' else 'asc') }}">Price</a></th>
+      <th><a href="{{ url_for('products.list_products', sort='sector', order='desc' if sort=='sector' and order=='asc' else 'asc') }}">Sector</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in products %}
+    <tr>
+      <td>{{ p.product_id }}</td>
+      <td>{{ p.product_name }}</td>
+      <td>{{ p.ticker_symbol or '' }}</td>
+      <td>{{ p.current_price or '' }}</td>
+      <td>{{ p.sector or '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+

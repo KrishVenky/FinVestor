@@ -129,3 +129,48 @@ class TransactionForm(FlaskForm):
     submit = SubmitField("Submit Trade")
 
 
+class LoginForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired(), Length(max=100)])
+    password = StringField("Password", validators=[DataRequired()], render_kw={"type": "password"})
+    submit = SubmitField("Log In")
+
+
+class SignupForm(FlaskForm):
+    entity_type = RadioField(
+        "Account Type",
+        choices=[("customer", "Customer"), ("employee", "Employee")],
+        validators=[DataRequired()],
+        default="customer"
+    )
+    entity_id = IntegerField("Customer/Employee ID", validators=[DataRequired(), NumberRange(min=1)])
+    username = StringField("Username", validators=[DataRequired(), Length(min=3, max=100)])
+    password = StringField("Password", validators=[DataRequired(), Length(min=6)], render_kw={"type": "password"})
+    password_confirm = StringField("Confirm Password", validators=[DataRequired()], render_kw={"type": "password"})
+    submit = SubmitField("Sign Up")
+
+
+class UserForm(FlaskForm):
+    """Form for admins/managers to create/edit user accounts."""
+    username = StringField("Username", validators=[DataRequired(), Length(min=3, max=100)])
+    password = StringField("Password", validators=[Optional(), Length(min=6)], render_kw={"type": "password"})
+    role = SelectField(
+        "Role",
+        choices=[
+            ("regular", "Regular"),
+            ("employee", "Employee"),
+            ("manager", "Manager"),
+            ("superadmin", "Superadmin"),
+        ],
+        validators=[DataRequired()],
+    )
+    c_id = SelectField("Customer", coerce=int, validators=[Optional()])
+    e_id = SelectField("Employee", coerce=int, validators=[Optional()])
+    is_active = RadioField(
+        "Status",
+        choices=[("True", "Active"), ("False", "Inactive")],
+        validators=[DataRequired()],
+        default="True",
+    )
+    submit = SubmitField("Save User")
+
+

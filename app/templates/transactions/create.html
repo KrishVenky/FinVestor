@@ -7,9 +7,13 @@
 
 <form method="post">
   {{ form.csrf_token }}
-  <div class="mb-3">{{ form.user.label(class="form-label") }}{{ form.user(class="form-select", id="user-select") }}</div>
-  <div class="mb-3">{{ form.p_id.label(class="form-label") }}{{ form.p_id(class="form-select") }}</div>
-  <div class="mb-3">{{ form.product_id.label(class="form-label") }}{{ form.product_id(class="form-select", id="product-select") }}</div>
+  {% if session.role in ['manager', 'superadmin'] %}
+  <div class="mb-3">{{ form.user.label(class="form-label") }}{{ form.user(class="form-select choices", id="user-select") }}</div>
+  {% else %}
+  {{ form.user() }}
+  {% endif %}
+  <div class="mb-3">{{ form.p_id.label(class="form-label") }}{{ form.p_id(class="form-select choices") }}</div>
+  <div class="mb-3">{{ form.product_id.label(class="form-label") }}{{ form.product_id(class="form-select choices", id="product-select") }}</div>
   <div class="mb-3">{{ form.quantity.label(class="form-label") }}{{ form.quantity(class="form-control") }}</div>
   <div class="mb-3">{{ form.price_per_unit.label(class="form-label") }}{{ form.price_per_unit(class="form-control", id="ppu-input") }}</div>
   <div class="mb-3">

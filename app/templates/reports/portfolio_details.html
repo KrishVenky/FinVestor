@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><i class="bi bi-diagram-3"></i> Portfolio Details (Join Query)</h2>
+  <a class="btn btn-outline-secondary" href="{{ url_for('reports.index') }}">Back to Reports</a>
+</div>
+
+<div class="alert alert-info">
+  <strong>Query Type:</strong> JOIN Query - Joins portfolios, customers, employees, transactions, and products tables
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Portfolio ID</th>
+            <th>Portfolio Name</th>
+            <th>Owner</th>
+            <th>Owner Type</th>
+            <th>Currency</th>
+            <th>Risk Level</th>
+            <th>Product</th>
+            <th>Ticker</th>
+            <th>Quantity</th>
+            <th>Price/Unit</th>
+            <th>Transaction Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ r.portfolio_id }}</td>
+            <td><strong>{{ r.portfolio_name }}</strong></td>
+            <td>{{ r.owner_name }}</td>
+            <td><span class="badge bg-{% if r.owner_type == 'Customer' %}primary{% else %}info{% endif %}">{{ r.owner_type }}</span></td>
+            <td>{{ r.currency or 'N/A' }}</td>
+            <td>{{ r.risk_level or 'N/A' }}</td>
+            <td>{{ r.product_name }}</td>
+            <td><code>{{ r.ticker_symbol }}</code></td>
+            <td>{{ r.quantity }}</td>
+            <td>${{ "%.2f"|format(r.price_per_unit) }}</td>
+            <td>{{ r.transaction_date.strftime('%Y-%m-%d') if r.transaction_date else 'N/A' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

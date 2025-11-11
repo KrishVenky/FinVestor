@@ -7,6 +7,7 @@ from sqlalchemy import text
 from werkzeug.exceptions import NotFound
 
 from .. import db
+from ..auth import login_required, manager_required, get_current_user, can_access_entity
 from ..forms import CustomerForm, CustomerDetailsForm
 from ..models import Customer, CustomerDetails, CustomerPhone, CustomerEmail
 
@@ -14,7 +15,14 @@ bp = Blueprint("customers", __name__, url_prefix="/customers")
 
 
 @bp.get("/")
+@login_required
 def list_customers():
+    """List customers - managers/superadmins see all, regular users see only themselves."""
+    current_user = get_current_user()
+    if current_user is None:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("auth.login"))
+    
     sort = request.args.get("sort", "id")
     order = request.args.get("order", "asc")
 
@@ -26,7 +34,16 @@ def list_customers():
     cols = col_map.get(sort, col_map["id"])  # default to id
     order_by = [c.desc() if order == "desc" else c.asc() for c in cols]
 
-    customers = Customer.query.order_by(*order_by).all()
+    # Managers and superadmins see all customers
+    if current_user.can_access_all():
+        customers = Customer.query.order_by(*order_by).all()
+    else:
+        # Regular users/employees see only their own customer record
+        if current_user.c_id is not None:
+            customers = Customer.query.filter_by(c_id=current_user.c_id).order_by(*order_by).all()
+        else:
+            customers = []
+    
     return render_template(
         "customers/list.html",
         customers=customers,
@@ -36,6 +53,7 @@ def list_customers():
 
 
 @bp.route("/create", methods=["GET", "POST"])
+@manager_required
 def create_customer():
     form = CustomerForm()
     if form.validate_on_submit():
@@ -53,10 +71,22 @@ def create_customer():
 
 
 @bp.route("/<int:c_id>/details", methods=["GET", "POST"])
+@login_required
 def details(c_id: int):
+    """View/edit customer details - users can only edit their own details."""
+    current_user = get_current_user()
+    if current_user is None:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("auth.login"))
+    
     customer = Customer.query.get(c_id)
     if customer is None:
         raise NotFound()
+    
+    # Check access: managers can access all, regular users only their own
+    if not current_user.can_access_all() and not can_access_entity(current_user, "customer", c_id):
+        flash("You do not have permission to access this customer.", "danger")
+        return redirect(url_for("customers.list_customers"))
 
     form = CustomerDetailsForm()
 
@@ -198,10 +228,22 @@ def details(c_id: int):
 
 
 @bp.get("/<int:c_id>")
+@login_required
 def view(c_id: int):
+    """View customer details - users can only view their own."""
+    current_user = get_current_user()
+    if current_user is None:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("auth.login"))
+    
     customer = Customer.query.get(c_id)
     if customer is None:
         raise NotFound()
+    
+    # Check access: managers can access all, regular users only their own
+    if not current_user.can_access_all() and not can_access_entity(current_user, "customer", c_id):
+        flash("You do not have permission to view this customer.", "danger")
+        return redirect(url_for("customers.list_customers"))
 
     # Calculate age via DB function Calculate_Age(dob DATE)
     age_years: int | None = None
@@ -269,5 +311,17 @@ def view(c_id: int):
         net_worth=net_worth,
         portfolio_products=portfolio_products,
     )
+
+
+@bp.route("/<int:c_id>/delete", methods=["POST"])
+@manager_required
+def delete_customer(c_id: int):
+    customer = Customer.query.get(c_id)
+    if customer is None:
+        raise NotFound()
+    db.session.delete(customer)
+    db.session.commit()
+    flash("Customer deleted successfully.", "success")
+    return redirect(url_for("customers.list_customers"))
 
 

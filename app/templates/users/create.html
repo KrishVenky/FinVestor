@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Create User Account</h2>
+  <a class="btn btn-outline-secondary" href="{{ url_for('users.list_users') }}">Back</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      
+      <div class="mb-3">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+        {% if form.username.errors %}
+          <div class="invalid-feedback">
+            {% for error in form.username.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+        {% if form.password.errors %}
+          <div class="invalid-feedback">
+            {% for error in form.password.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+        <small class="form-text text-muted">Minimum 6 characters.</small>
+      </div>
+
+      <div class="mb-3">
+        {{ form.role.label(class="form-label") }}
+        {{ form.role(class="form-select" + (" is-invalid" if form.role.errors else "")) }}
+        {% if form.role.errors %}
+          <div class="invalid-feedback">
+            {% for error in form.role.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+        <small class="form-text text-muted">Select the user's role. Managers and Superadmins have full access.</small>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          {{ form.c_id.label(class="form-label") }}
+          {{ form.c_id(class="form-select" + (" is-invalid" if form.c_id.errors else "")) }}
+          {% if form.c_id.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.c_id.errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          {{ form.e_id.label(class="form-label") }}
+          {{ form.e_id(class="form-select" + (" is-invalid" if form.e_id.errors else "")) }}
+          {% if form.e_id.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.e_id.errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mb-3">
+        <small class="form-text text-muted">Select either a Customer or Employee (at least one required).</small>
+      </div>
+
+      <div class="mb-4">
+        {{ form.is_active.label(class="form-label") }}
+        <div class="mt-2">
+          {% for subfield in form.is_active %}
+            <div class="form-check form-check-inline">
+              {{ subfield(class="form-check-input") }}
+              {{ subfield.label(class="form-check-label") }}
+            </div>
+          {% endfor %}
+        </div>
+        {% if form.is_active.errors %}
+          <div class="text-danger small mt-1">
+            {% for error in form.is_active.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{{ url_for('users.list_users') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class="btn btn-primary") }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,11 +1,40 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h2>Reports</h2>
-<ul>
-  <li><a href="{{ url_for('reports.kyc_contact_audit') }}">KYC Contact Audit</a></li>
-  <li><a href="{{ url_for('reports.aum_by_currency') }}">Total AUM by Currency</a></li>
-  <li><a href="{{ url_for('reports.tech_sector_employee_investors') }}">Tech Sector Employee Investors</a></li>
-  </ul>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-bar-chart-line"></i> Reports</h2>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-diagram-3 text-primary"></i> Portfolio Details</h5>
+        <p class="card-text">Join query showing all portfolio transactions with customer/employee and product details.</p>
+        <a href="{{ url_for('reports.portfolio_details') }}" class="btn btn-primary">View Report</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-graph-up-arrow text-success"></i> Top Portfolios by Value</h5>
+        <p class="card-text">Nested query showing portfolios with total value above average portfolio value.</p>
+        <a href="{{ url_for('reports.top_portfolios_by_value') }}" class="btn btn-success">View Report</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-calculator text-warning"></i> Portfolio Performance Summary</h5>
+        <p class="card-text">Aggregate query with GROUP BY showing performance metrics by currency and risk level.</p>
+        <a href="{{ url_for('reports.portfolio_performance_summary') }}" class="btn btn-warning">View Report</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 

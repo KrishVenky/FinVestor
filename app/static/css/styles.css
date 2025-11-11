@@ -1,3 +1,8 @@
-body { padding-bottom: 40px; }
+body { padding-bottom: 40px; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; }
 textarea { resize: vertical; }
+.card { border: none; border-radius: 0.75rem; }
+.card .card-title { font-weight: 600; }
+.navbar-brand { font-weight: 700; letter-spacing: .2px; }
+.table thead th { white-space: nowrap; }
+.table td, .table th { vertical-align: middle; }
 

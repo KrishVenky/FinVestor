@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from flask import Blueprint, flash, redirect, render_template, url_for, request
+from werkzeug.exceptions import NotFound
 
 from .. import db
+from ..auth import login_required, manager_required, get_current_user, can_access_entity
 from ..forms import PortfolioForm
 from ..models import Portfolio, Customer, Employee
 
@@ -10,7 +12,14 @@ bp = Blueprint("portfolios", __name__, url_prefix="/portfolios")
 
 
 @bp.get("/")
+@login_required
 def list_portfolios():
+    """List portfolios - managers/superadmins see all, regular users see only their own."""
+    current_user = get_current_user()
+    if current_user is None:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("auth.login"))
+    
     sort = request.args.get("sort", "id")
     order = request.args.get("order", "asc")
 
@@ -25,11 +34,23 @@ def list_portfolios():
     cols = col_map.get(sort, col_map["id"])  # default id
     order_by = [c.desc() if order == "desc" else c.asc() for c in cols]
 
-    portfolios = Portfolio.query.order_by(*order_by).all()
+    # Managers and superadmins see all portfolios
+    if current_user.can_access_all():
+        portfolios = Portfolio.query.order_by(*order_by).all()
+    else:
+        # Regular users/employees see only their own portfolios
+        if current_user.c_id is not None:
+            portfolios = Portfolio.query.filter_by(c_id=current_user.c_id).order_by(*order_by).all()
+        elif current_user.e_id is not None:
+            portfolios = Portfolio.query.filter_by(e_id=current_user.e_id).order_by(*order_by).all()
+        else:
+            portfolios = []
+    
     return render_template("portfolios/list.html", portfolios=portfolios, sort=sort, order=order)
 
 
 @bp.route("/create", methods=["GET", "POST"])
+@manager_required
 def create_portfolio():
     form = PortfolioForm()
     customers = Customer.query.order_by(Customer.first_name.asc(), Customer.last_name.asc()).all()
@@ -58,5 +79,17 @@ def create_portfolio():
         return redirect(url_for("portfolios.list_portfolios"))
 
     return render_template("portfolios/create.html", form=form)
+
+
+@bp.route("/<int:p_id>/delete", methods=["POST"])
+@manager_required
+def delete_portfolio(p_id: int):
+    portfolio = Portfolio.query.get(p_id)
+    if portfolio is None:
+        raise NotFound()
+    db.session.delete(portfolio)
+    db.session.commit()
+    flash("Portfolio deleted successfully.", "success")
+    return redirect(url_for("portfolios.list_portfolios"))
 
 

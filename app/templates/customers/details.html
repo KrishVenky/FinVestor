@@ -32,7 +32,7 @@
         {% for entry in form.phones %}
           <div class="row g-2 mb-2 phone-row">
             <div class="col-6">{{ entry.form.phone_number(class="form-control", placeholder="Phone Number") }}</div>
-            <div class="col-4">{{ entry.form.phone_type(class="form-select") }}</div>
+            <div class="col-4">{{ entry.form.phone_type(class="form-select choices") }}</div>
             <div class="col-2 d-grid"><button type="button" class="btn btn-outline-danger" onclick="removePhoneRow(this)">Remove</button></div>
           </div>
         {% endfor %}
@@ -44,7 +44,7 @@
         {% for entry in form.emails %}
           <div class="row g-2 mb-2 email-row">
             <div class="col-6">{{ entry.form.email_address(class="form-control", placeholder="Email Address") }}</div>
-            <div class="col-4">{{ entry.form.email_type(class="form-select") }}</div>
+            <div class="col-4">{{ entry.form.email_type(class="form-select choices") }}</div>
             <div class="col-2 d-grid"><button type="button" class="btn btn-outline-danger" onclick="removeEmailRow(this)">Remove</button></div>
           </div>
         {% endfor %}
@@ -78,7 +78,7 @@ function addPhone(){
   <div class="row g-2 mb-2 phone-row">
     <div class="col-6"><input class="form-control" id="phones-${index}-phone_number" name="phones-${index}-phone_number" type="text" value=""></div>
     <div class="col-4">
-      <select class="form-select" id="phones-${index}-phone_type" name="phones-${index}-phone_type">
+      <select class="form-select choices" id="phones-${index}-phone_type" name="phones-${index}-phone_type">
         <option value="mobile">Mobile</option>
         <option value="home">Home</option>
         <option value="work">Work</option>
@@ -96,7 +96,7 @@ function addEmail(){
   <div class="row g-2 mb-2 email-row">
     <div class="col-6"><input class="form-control" id="emails-${index}-email_address" name="emails-${index}-email_address" type="email" value=""></div>
     <div class="col-4">
-      <select class="form-select" id="emails-${index}-email_type" name="emails-${index}-email_type">
+      <select class="form-select choices" id="emails-${index}-email_type" name="emails-${index}-email_type">
         <option value="personal">Personal</option>
         <option value="work">Work</option>
         <option value="other">Other</option>

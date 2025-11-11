@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from flask import Blueprint, flash, redirect, render_template, url_for, request
+from werkzeug.exceptions import NotFound
 
 from .. import db
+from ..auth import login_required, manager_required, get_current_user, can_access_entity
 from ..forms import EmployeeForm
 from ..models import Employee
 
@@ -10,7 +12,14 @@ bp = Blueprint("employees", __name__, url_prefix="/employees")
 
 
 @bp.get("/")
+@login_required
 def list_employees():
+    """List employees - managers/superadmins see all, regular users see only themselves."""
+    current_user = get_current_user()
+    if current_user is None:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("auth.login"))
+    
     sort = request.args.get("sort", "id")
     order = request.args.get("order", "asc")
 
@@ -23,11 +32,21 @@ def list_employees():
     cols = col_map.get(sort, col_map["id"])  # default id
     order_by = [c.desc() if order == "desc" else c.asc() for c in cols]
 
-    employees = Employee.query.order_by(*order_by).all()
+    # Managers and superadmins see all employees
+    if current_user.can_access_all():
+        employees = Employee.query.order_by(*order_by).all()
+    else:
+        # Regular users/employees see only their own employee record
+        if current_user.e_id is not None:
+            employees = Employee.query.filter_by(e_id=current_user.e_id).order_by(*order_by).all()
+        else:
+            employees = []
+    
     return render_template("employees/list.html", employees=employees, sort=sort, order=order)
 
 
 @bp.route("/create", methods=["GET", "POST"])
+@manager_required
 def create_employee():
     form = EmployeeForm()
     # Populate manager choices with current employees
@@ -49,5 +68,17 @@ def create_employee():
         return redirect(url_for("employees.list_employees"))
 
     return render_template("employees/create.html", form=form)
+
+
+@bp.route("/<int:e_id>/delete", methods=["POST"])
+@manager_required
+def delete_employee(e_id: int):
+    employee = Employee.query.get(e_id)
+    if employee is None:
+        raise NotFound()
+    db.session.delete(employee)
+    db.session.commit()
+    flash("Employee deleted successfully.", "success")
+    return redirect(url_for("employees.list_employees"))
 
 

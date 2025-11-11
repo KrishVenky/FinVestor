@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from sqlalchemy import UniqueConstraint, CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db
 
@@ -145,5 +146,59 @@ class Transaction(db.Model):
 
     portfolio: Mapped[Portfolio] = relationship(back_populates="transactions")
     product: Mapped[Product] = relationship(back_populates="transactions")
+
+
+class User(db.Model):
+    """User authentication model linking to Customer or Employee with role-based access."""
+    __tablename__ = "users"
+
+    user_id: Mapped[int] = mapped_column("user_id", db.Integer, primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(db.String(100), nullable=False, unique=True)
+    password_hash: Mapped[str] = mapped_column("password_hash", db.String(255), nullable=False)
+    role: Mapped[str] = mapped_column(
+        db.Enum("regular", "employee", "manager", "superadmin", name="user_role_enum"),
+        nullable=False,
+        default="regular"
+    )
+    c_id: Mapped[int | None] = mapped_column("C_ID", ForeignKey("customers.C_ID"), nullable=True)
+    e_id: Mapped[int | None] = mapped_column("E_ID", ForeignKey("employees.E_ID"), nullable=True)
+    is_active: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=True)
+
+    customer: Mapped[Optional["Customer"]] = relationship("Customer")
+    employee: Mapped[Optional["Employee"]] = relationship("Employee")
+
+    __table_args__ = (
+        CheckConstraint(
+            "(c_id IS NOT NULL) OR (e_id IS NOT NULL)",
+            name="chk_user_has_entity",
+        ),
+    )
+
+    def set_password(self, password: str) -> None:
+        """Hash and set the user's password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Verify the provided password against the stored hash."""
+        return check_password_hash(self.password_hash, password)
+
+    def is_manager_or_above(self) -> bool:
+        """Check if user has manager or superadmin privileges."""
+        return self.role in ("manager", "superadmin")
+
+    def can_access_all(self) -> bool:
+        """Check if user can access all data (manager/superadmin)."""
+        return self.role in ("manager", "superadmin")
+
+    def get_entity_id(self) -> int | None:
+        """Get the associated customer or employee ID."""
+        return self.c_id if self.c_id is not None else self.e_id
+
+    def get_entity_type(self) -> str:
+        """Get the entity type: 'customer' or 'employee'."""
+        return "customer" if self.c_id is not None else "employee"
+
+    def __repr__(self) -> str:
+        return f"<User {self.user_id} {self.username} ({self.role})>"
 
 

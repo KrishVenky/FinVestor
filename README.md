@@ -55,6 +55,9 @@ FLASK_DEBUG=1
 - Trigger: `before_employee_insert` (sets `specialization='General Support'` when NULL)
 
 ## Features Implemented
+- **Authentication & Role-Based Access Control**: Login system with roles (regular, employee, manager, superadmin)
+  - Regular users/employees: Can only view/edit their own portfolio and personal details
+  - Managers/Superadmins: Full access to all data and management functions
 - Master screens: Customers, Employees, Products
 - Dependent sub-forms: KYC & Risk Profile, Phones, Emails (add/remove rows)
 - Business screens: Portfolios (dual ownership), Trade Execution (stored procedure call)
@@ -62,7 +65,7 @@ FLASK_DEBUG=1
 - Product price auto-fills on selection; server also defaults from product if blank
 - Client View shows total net worth and per-portfolio purchased products
 - Clickable table headers with sorting (ID default ascending)
-- Reports: KYC Contact Audit, Total AUM by Currency, Tech Sector Employee Investors
+- Reports: KYC Contact Audit, Total AUM by Currency, Tech Sector Employee Investors (manager/superadmin only)
 
 ## Notes
 - Uniqueness checks: Ticker Symbol, Aadhar, Email; safe upsert for emails (prevents duplicates)
@@ -71,13 +74,57 @@ FLASK_DEBUG=1
 - Trigger is implicitly exercised on Employee insert
 - `.gitignore` included to ignore venvs, caches, logs, and `.env`
 
+## Authentication Setup
+
+After creating the base schema, run the users table migration:
+
+```powershell
+mysql -h 127.0.0.1 -P 3306 -u $env:DB_USER -p $env:DB_NAME < .\sql\migration_users.sql
+```
+
+Then create user accounts using the helper script:
+
+```powershell
+# Create a regular customer user (linked to customer ID 1)
+python scripts/create_user.py john_doe password123 regular 1
+
+# Create an employee user (linked to employee ID 1)
+python scripts/create_user.py jane_smith password123 employee 1
+
+# Create a manager user (linked to employee ID 1)
+python scripts/create_user.py manager1 password123 manager 1
+
+# Create a superadmin user (linked to employee ID 1)
+python scripts/create_user.py admin password123 superadmin 1
+```
+
+**Role Permissions:**
+- **regular**: Can only view/edit their own customer record and portfolios
+- **employee**: Can only view/edit their own employee record and portfolios
+- **manager**: Full access to all data, can create/edit/delete customers, employees, products, portfolios
+- **superadmin**: Same as manager (full access)
+
 ## Next Improvements
-- Add authentication/roles
 - Pagination and search across lists
 - Client-side enhancements (searchable dropdowns, modals)
+- User profile management
 
-## Create DB objects (function/procedure/trigger)
-Run this once after tables exist (PowerShell):
+## Database Setup
+
+### 1. Create base schema
+Run the base schema first:
+
+```powershell
+mysql -h 127.0.0.1 -P 3306 -u $env:DB_USER -p $env:DB_NAME < .\sql\schema.sql
+```
+
+### 2. Create users table (for authentication)
+```powershell
+mysql -h 127.0.0.1 -P 3306 -u $env:DB_USER -p $env:DB_NAME < .\sql\migration_users.sql
+```
+
+### 3. Create DB objects (function/procedure/trigger)
+Run this once after tables exist:
 
 ```powershell
 mysql -h 127.0.0.1 -P 3306 -u $env:DB_USER -p $env:DB_NAME < .\sql\objects.sql
@@ -92,6 +139,8 @@ mysql -h 127.0.0.1 -P 3306 -u your_user -p financial_platform_db < .\sql\objects
 Or interactively:
 ```sql
 -- inside mysql client, after selecting DB
+SOURCE sql/schema.sql;
+SOURCE sql/migration_users.sql;
 SOURCE sql/objects.sql;
 ```
 

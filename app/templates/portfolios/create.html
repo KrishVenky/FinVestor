@@ -8,11 +8,11 @@
 <form method="post">
   {{ form.csrf_token }}
   <div class="mb-3">{{ form.portfolio_name.label(class="form-label") }}{{ form.portfolio_name(class="form-control") }}</div>
-  <div class="mb-3">{{ form.c_id.label(class="form-label") }}{{ form.c_id(class="form-select") }}</div>
-  <div class="mb-3">{{ form.e_id.label(class="form-label") }}{{ form.e_id(class="form-select") }}</div>
+  <div class="mb-3">{{ form.c_id.label(class="form-label") }}{{ form.c_id(class="form-select choices") }}</div>
+  <div class="mb-3">{{ form.e_id.label(class="form-label") }}{{ form.e_id(class="form-select choices") }}</div>
   <div class="mb-3">{{ form.creation_date.label(class="form-label") }}{{ form.creation_date(class="form-control") }}</div>
-  <div class="mb-3">{{ form.risk_level.label(class="form-label") }}{{ form.risk_level(class="form-select") }}</div>
-  <div class="mb-3">{{ form.currency.label(class="form-label") }}{{ form.currency(class="form-select") }}</div>
+  <div class="mb-3">{{ form.risk_level.label(class="form-label") }}{{ form.risk_level(class="form-select choices") }}</div>
+  <div class="mb-3">{{ form.currency.label(class="form-label") }}{{ form.currency(class="form-select choices") }}</div>
   <div>{{ form.submit(class="btn btn-primary") }}</div>
 </form>
 {% endblock %}

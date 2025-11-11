@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from flask import Blueprint, flash, redirect, render_template, url_for, request
+from werkzeug.exceptions import NotFound
 
 from .. import db
+from ..auth import login_required, manager_required
 from ..forms import ProductForm
 from ..models import Product
 
@@ -10,6 +12,7 @@ bp = Blueprint("products", __name__, url_prefix="/products")
 
 
 @bp.get("/")
+@login_required
 def list_products():
     sort = request.args.get("sort", "id")
     order = request.args.get("order", "asc")
@@ -29,6 +32,7 @@ def list_products():
 
 
 @bp.route("/create", methods=["GET", "POST"])
+@manager_required
 def create_product():
     form = ProductForm()
     if form.validate_on_submit():
@@ -51,5 +55,17 @@ def create_product():
         flash("Product created.", "success")
         return redirect(url_for("products.list_products"))
     return render_template("products/create.html", form=form)
+
+
+@bp.route("/<int:product_id>/delete", methods=["POST"])
+@manager_required
+def delete_product(product_id: int):
+    product = Product.query.get(product_id)
+    if product is None:
+        raise NotFound()
+    db.session.delete(product)
+    db.session.commit()
+    flash("Product deleted successfully.", "success")
+    return redirect(url_for("products.list_products"))
 
 
